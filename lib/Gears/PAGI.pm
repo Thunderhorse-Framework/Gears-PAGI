@@ -1,9 +1,46 @@
 package Gears::PAGI;
 
-use v5.14;
-use warnings;
+use v5.40;
+use Future::AsyncAwait;
+use List::Util qw(uniq);
 
-1;
+use Devel::StrictMode;
+
+async sub handle_lifespan ($scope, $receive, $send, %events)
+{
+	# NOTE: must be run for 'lifespan' scope - checked in development mode
+	die 'bad scope type for lifespan handling - forgot to check scope?'
+		if STRICT && $scope->{type} ne 'lifespan';
+
+	my %known_events = map { $_ => true } uniq keys %events, qw(startup shutdown);
+
+	while ('handling lifespan') {
+		my $message = await $receive->();
+		my $type = $message->{type};
+
+		next unless $type =~ s{^lifespan\.}{};
+
+		# TODO: make sure events can be forwarded (overwrite $receive, $send?)
+		if ($known_events{$type}) {
+			try {
+				await $events{$type}->($scope, $receive, $send)
+					if $events{$type};
+
+				await $send->({
+					type => "lifespan.$type.complete",
+				});
+			}
+			catch ($e) {
+				await $send->({
+					type => "lifespan.$type.failed",
+					message => "$e",
+				});
+			}
+		}
+
+		# NOTE: ignores events which are not known
+	}
+}
 
 __END__
 

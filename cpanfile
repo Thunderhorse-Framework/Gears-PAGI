@@ -6,4 +6,6 @@ on 'test' => sub {
 requires 'perl' => '5.040';
 requires 'Gears' => '0.104';
 requires 'Future::AsyncAwait' => '0';
+requires 'Cookie::Baker' => '0';
+requires 'Hash::MultiValue' => '0';
 
