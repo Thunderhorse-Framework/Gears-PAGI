@@ -2,3 +2,8 @@ on 'test' => sub {
 	requires 'Test2::V0' => '0';
 };
 
+
+requires 'perl' => '5.040';
+requires 'Gears' => '0.104';
+requires 'Future::AsyncAwait' => '0';
+
