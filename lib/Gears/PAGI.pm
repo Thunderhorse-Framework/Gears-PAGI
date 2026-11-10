@@ -1,10 +1,15 @@
 package Gears::PAGI;
 
 use v5.40;
+use Exporter qw(import);
 use Future::AsyncAwait;
 use List::Util qw(uniq);
 
 use Devel::StrictMode;
+
+our @EXPORT_OK = qw(
+	handle_lifespan
+);
 
 async sub handle_lifespan ($scope, $receive, $send, %events)
 {
@@ -26,15 +31,19 @@ async sub handle_lifespan ($scope, $receive, $send, %events)
 				await $events{$type}->($scope, $receive, $send)
 					if $events{$type};
 
-				await $send->({
-					type => "lifespan.$type.complete",
-				});
+				await $send->(
+					{
+						type => "lifespan.$type.complete",
+					}
+				);
 			}
 			catch ($e) {
-				await $send->({
-					type => "lifespan.$type.failed",
-					message => "$e",
-				});
+				await $send->(
+					{
+						type => "lifespan.$type.failed",
+						message => "$e",
+					}
+				);
 			}
 		}
 

@@ -4,6 +4,10 @@ use v5.40;
 use Mooish::Base -standard;
 
 use Devel::StrictMode;
+use Gears::PAGI::Request;
+use Gears::PAGI::Response;
+use Gears::PAGI::WebSocket;
+use Gears::PAGI::SSE;
 
 extends 'Gears::Context';
 
@@ -76,7 +80,7 @@ sub update ($self, $scope, $receive, $send)
 	$self->_set_pagi([$scope, $receive, $send]);
 }
 
-sub connection
+sub connection ($self)
 {
 	return $self->scope->{'pagi.connection'};
 }
